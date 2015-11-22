@@ -108,14 +108,13 @@ Finally, combine Merged_table_train with Merged_table_test. Also arrange the dat
 		Merged_table <- arrange (Merged_table, Subject)
 		head (Merged_table, 5)
 
-###### Last but not least, step 5 of the PA requires us to create an independent tidy data set containing the average of each
-######	  variable for each activity and each subject. There are 180 subject-activity pairs in total.
+Last but not least, step 5 of the PA requires us to create an independent tidy data set containing the average of each variable for each activity and each subject. There are 180 subject-activity pairs in total.
 
 		Merged_table_avg <- group_by (Merged_table, Activity, Subject)
 		Merged_table_avg_final <- summarize_each (Merged_table_avg, funs (mean), - c( Subject, Activity, Trial))
 		write.table (Merged_table_avg_final, file = "Cleaning & Gathering Data PA", row.names = F)
 		
-To best view the data, load the "data.table" package into R before reading the text file: library (data.table) -> fread ("Cleaning & Gathering Data PA.txt")
+Write.table creates a file called "Cleaning & Gathering Data PA" in the working directory. Resave the file as a ".md" file. Now, load the "data.table" package into R before reading the text file. Follow the steps below. library (data.table) -> fread ("Cleaning & Gathering Data PA.md")
 
 The resulting, final dataset fulfills the core tidy data rules.
 (1) Each variable forms a column.
