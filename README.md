@@ -23,12 +23,9 @@ tBodyAccJerkMean
 tBodyGyroMean
 tBodyGyroJerkMean
 
-updates the codebooks available to you with the data to indicate all the variables and summaries you calculated, along with units, and any other relevant information?
-
-
-ID  |   Variables                                   |   Units                                     |   Variable Description
---- |   ------------------------------------------  |   --------------------------------------    |   -------------------- 
-1   |   Activity                                    |   N/A                                       | fff
+ID  |   Variables                                   |   Units                                     |   
+--- |   ------------------------------------------  |   --------------------------------------    |    
+1   |   Activity                                    |   N/A                                       | 
 2   |   Subject                                     |   N/A                                       |
 3   |   tBodyAcc.mean...X                           |   standard gravity units "g", i.e. m/s^2    |
 4   |   tBodyAcc.mean...Y                           |   standard gravity units "g", i.e. m/s^2    |
