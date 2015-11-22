@@ -10,7 +10,7 @@ The goal of this PA is to create a tidy dataset that contains the mean of variou
  
 First, the project data was downloaded and unzipped. Link: https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip 
 
-Note to my peers: if you are planning to run this code, first download and unzip the data before saving thisscript to your working directory. Then source the R file and run the function "run_analysis". The remaining comments and code below serves as a guide to how the code was written.
+Note to my peers: if you are planning to run this code, first download and unzip the data before saving this script to your working directory. Then source the R file and run the function "run_analysis". The remaining comments and code below serves as a guide to how the code was written.
 
 Load the library packages "dplyr" and "tidyr". That allows us to use functions such as "summarize_each".
 			library (dplyr)
