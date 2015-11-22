@@ -1,117 +1,170 @@
-#### Gathering & Cleaning Data_PeerAssessment - Codebook
-##### This codebook contains information about the variables listed in the "Merged_table_avg_final" dataset.
+###This README file
 
-###### Background
+run_analysis <- function () {
 
-The features (variables) selected for this database come from the accelerometer and gyroscope 3-axial raw signals tAcc-XYZ and tGyro-XYZ. These time domain signals (prefix 't' to denote time) were captured at a constant rate of 50 Hz. Then they were filtered using a median filter and a 3rd order low pass Butterworth filter with a corner frequency of 20 Hz to remove noise. Similarly, the acceleration signal was then separated into body and gravity acceleration signals (tBodyAcc-XYZ and tGravityAcc-XYZ) using another low pass Butterworth filter with a corner frequency of 0.3 Hz. 
+### The goal of this PA is to create a tidy dataset that contains the mean of various variables of various subjects
+###	and activities. This code was written in a manner that I thought would be most efficient, meaning that I
+### 	  (1) first labeled the measurement data sets (X_train & X_test) with descriptive variable names
+###     (2) secondly renamed the activities in the "Y_train" & "Y_test" data sets
+###	  (3) thirdly extracted the measurements on the mean and std for each variable
+###	  (4) merged the training and test sets to create one data set
+###	  (5) lastly, created an independent tidy data set containing the average of each variable for each activity
+###	 	and each subject
+ 
+### First, the project data was downloaded and unzipped. 
+### Link: https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip 
+### Note to my peers: if you are planning to run this code, first download and unzip the data before saving this
+###	script to your working directory. Then source the R file and run the function "run_analysis".
+### The remaining comments and code below serves as a guide to how the code was written.
 
-Subsequently, the body linear acceleration and angular velocity were derived in time to obtain Jerk signals (tBodyAccJerk-XYZ and tBodyGyroJerk-XYZ). Also the magnitude of these three-dimensional signals were calculated using the Euclidean norm (tBodyAccMag, tGravityAccMag, tBodyAccJerkMag, tBodyGyroMag, tBodyGyroJerkMag). 
+### Load the library packages "dplyr" and "tidyr". That allows us to use functions such as "summarize_each".
+	library (dplyr)
+	library (tidyr)
 
-Finally a Fast Fourier Transform (FFT) was applied to some of these signals producing fBodyAcc-XYZ, fBodyAccJerk-XYZ, fBodyGyro-XYZ, fBodyAccJerkMag, fBodyGyroMag, fBodyGyroJerkMag. (Note the 'f' to indicate frequency domain signals). 
+### Now, let's read the following files (these files have already been downloaded and unzipped in my personal folder): 
+###	(1) activity_labels.txt
+###	(2) features.txt
+###	(3) train\subject_train.txt
+###	(4) train\X_train.txt"
+###	(5) train\y_train.txt"
+###	(6) test\subject_test.txt
+###	(7) test\X_test.txt
+###	(8) test\y_test.txt
 
-These signals were used to estimate variables of the feature vector for each pattern:  
-'-XYZ' is used to denote 3-axial signals in the X, Y and Z directions.
+	activity <- read.table ("activity_labels.txt", header = F, stringsAsFactors = F)
+	features <- read.table ("features.txt", header = F, stringsAsFactors = F)
+	train_subject <- read.table (".\\train\\subject_train.txt", header = F)
+	X_train <- read.table (".\\train\\X_train.txt", header = F)
+	Y_train <- read.table (".\\train\\y_train.txt", header = F)
+	test_subject <- read.table (".\\test\\subject_test.txt", header = F)
+	X_test <- read.table (".\\test\\X_test.txt", header = F)
+	Y_test <- read.table (".\\test\\y_test.txt", header = F)
 
-The set of variables that were estimated from these signals and included in the dataset are: 
-mean(): Mean value
-std(): Standard deviation
+### Before we can merge the training and test sets, let's rename the variables (column names) of
+###	the following 2 files:
+###	(1) X_train (X_train.txt)
+###	(2) X_test (X_test.txt)
 
-Additional vectors obtained by averaging the signals in a signal window sample. These are used on the angle() variable:
-gravityMean
-tBodyAccMean
-tBodyAccJerkMean
-tBodyGyroMean
-tBodyGyroJerkMean
+### Currently, the X_train & X_test contains column names of (V1, V2..., V561) when we read the
+###	data via read.table. Let's replace these variable names by matching the numbers with the ID's  
+###	of the measurements in the "features.txt" file. For example, X_train column 1 will be renamed 
+###	to "tBodyAcc-mean()-X", which corresponds to ID 1. This fulfills requirement #4 in the assignment,
+###	which is to appropriately label the data set with descriptive variable names.
 
-ID  |   Variables                                   |   Units                                     |   
---- |   ------------------------------------------  |   --------------------------------------    |    
-1   |   Activity                                    |   N/A                                       | 
-2   |   Subject                                     |   N/A                                       |
-3   |   tBodyAcc.mean...X                           |   standard gravity units "g", i.e. m/s^2    |
-4   |   tBodyAcc.mean...Y                           |   standard gravity units "g", i.e. m/s^2    |
-5   |   tBodyAcc.mean...Z                           |   standard gravity units "g", i.e. m/s^2    |
-6   |   tGravityAcc.mean...X                        |   standard gravity units "g", i.e. m/s^2    |
-7   |   tGravityAcc.mean...Y                        |   standard gravity units "g", i.e. m/s^2    |
-8   |   tGravityAcc.mean...Z                        |   standard gravity units "g", i.e. m/s^2    |
-9   |   tBodyAccJerk.mean...X                       |   standard gravity units "g", i.e. m/s^2    |
-10  |   tBodyAccJerk.mean...Y                       |   standard gravity units "g", i.e. m/s^2    |
-11  |   tBodyAccJerk.mean...Z                       |   standard gravity units "g", i.e. m/s^2    |
-12  |   tBodyGyro.mean...X                          |   radians/second                            |
-13  |   tBodyGyro.mean...Y                          |   radians/second                            |
-14  |   tBodyGyro.mean...Z                          |   radians/second                            |
-15  |   tBodyGyroJerk.mean...X                      |   radians/second                            |
-16  |   tBodyGyroJerk.mean...Y                      |   radians/second                            |
-17  |   tBodyGyroJerk.mean...Z                      |   radians/second                            |
-18  |   tBodyAccMag.mean..                          |   standard gravity units "g", i.e. m/s^2    |
-19  |   tGravityAccMag.mean..                       |   standard gravity units "g", i.e. m/s^2    |
-20  |   tBodyAccJerkMag.mean..                      |   standard gravity units "g", i.e. m/s^2    |
-21  |   tBodyGyroMag.mean..                         |   standard gravity units "g", i.e. m/s^2    |
-22  |   tBodyGyroJerkMag.mean..                     |   standard gravity units "g", i.e. m/s^2    |
-23  |   fBodyAcc.mean...X                           |   Hz                                        |
-24  |   fBodyAcc.mean...Y                           |   Hz                                        |
-25  |   fBodyAcc.mean...Z                           |   Hz                                        |
-26  |   fBodyAcc.meanFreq...X                       |   Hz                                        |
-27  |   fBodyAcc.meanFreq...Y                       |   Hz                                        |
-28  |   fBodyAccJerk.mean...X                       |   Hz                                        |
-29  |   fBodyAccJerk.mean...                        |   Hz                                        |
-30  |   fBodyAcc.meanFreq...Z                       |   Hz                                        |
-31  |   fBodyAccJerk.mean...Z                       |   Hz                                        |
-32  |   fBodyAccJerk.meanFreq...X                   |   Hz                                        |
-33  |   fBodyAccJerk.meanFreq...Y                   |   Hz                                        |
-34  |   fBodyAccJerk.meanFreq...Z                   |   Hz                                        |
-35  |   fBodyGyro.mean...X                          |   Hz                                        |
-36  |   fBodyGyro.mean...Y                          |   Hz                                        |
-37  |   fBodyGyro.mean...Z                          |   Hz                                        |
-38  |   fBodyGyro.meanFreq...X                      |   Hz                                        |
-39  |   fBodyGyro.meanFreq...Y                      |   Hz                                        |
-40  |   fBodyGyro.meanFreq...Z                      |   Hz                                        |
-41  |   fBodyAccMag.mean..                          |   Hz                                        |
-42  |   fBodyAccMag.meanFreq..                      |   Hz                                        |
-43  |   fBodyBodyAccJerkMag.mean..                  |   Hz                                        |
-44  |   fBodyBodyAccJerkMag.meanFreq..              |   Hz                                        |
-45  |   fBodyBodyGyroMag.mean..                     |   Hz                                        |
-46  |   fBodyBodyGyroMag.meanFreq..                 |   Hz                                        |
-47  |   fBodyBodyGyroJerkMag.mean..                 |   Hz                                        |
-48  |   fBodyBodyGyroJerkMag.meanFreq..             |   Hz                                        |
-49  |   angle.tBodyAccMean.gravity.                 |   Degrees                                   |
-50  |   angle.tBodyAccJerkMean..gravityMean.        |   Degrees                                   |
-51  |   angle.tBodyGyroMean.gravityMean.            |   Degrees                                   |
-52  |   angle.tBodyGyroJerkMean.gravityMean.        |   Degrees                                   |
-53  |   angle.X.gravityMean.                        |   Degrees                                   |
-54  |   angle.Y.gravityMean.                        |   Degrees                                   |
-55  |   angle.Z.gravityMean.                        |   Degrees                                   |
-56  |   tBodyAcc.std...X                            |   standard gravity units "g", i.e. m/s^2    |
-57  |   tBodyAcc.std...Y                            |   standard gravity units "g", i.e. m/s^2    |
-58  |   tBodyAcc.std...Z                            |   standard gravity units "g", i.e. m/s^2    |
-59  |   tGravityAcc.std...X                         |   standard gravity units "g", i.e. m/s^2    |
-60  |   tGravityAcc.std...Y                         |   standard gravity units "g", i.e. m/s^2    |
-61  |   tGravityAcc.std...Z                         |   standard gravity units "g", i.e. m/s^2    |
-62  |   tBodyAccJerk.std...X                        |   standard gravity units "g", i.e. m/s^2    |
-63  |   tBodyAccJerk.std...Y                        |   standard gravity units "g", i.e. m/s^2    |
-64  |   tBodyAccJerk.std...Z                        |   standard gravity units "g", i.e. m/s^2    |
-65  |   tBodyGyro.std...X                           |   standard gravity units "g", i.e. m/s^2    |
-66  |   tBodyGyro.std...Y                           |   standard gravity units "g", i.e. m/s^2    |
-67  |   tBodyGyro.std...Z                           |   standard gravity units "g", i.e. m/s^2    |
-68  |   tBodyGyroJerk.std...X                       |   standard gravity units "g", i.e. m/s^2    |
-69  |   tBodyGyroJerk.std...Y                       |   standard gravity units "g", i.e. m/s^2    |
-70  |   tBodyGyroJerk.std...Z                       |   standard gravity units "g", i.e. m/s^2    |
-71  |   tBodyAccMag.std..                           |   standard gravity units "g", i.e. m/s^2    |
-72  |   tGravityAccMag.std..                        |   standard gravity units "g", i.e. m/s^2    |
-73  |   tBodyAccJerkMag.std..                       |   standard gravity units "g", i.e. m/s^2    |
-74  |   tBodyGyroMag.std..                          |   standard gravity units "g", i.e. m/s^2    |
-75  |   tBodyGyroJerkMag.std..                      |   standard gravity units "g", i.e. m/s^2    |
-76  |   fBodyAcc.std...X                            |   Hz                                        |
-77  |   fBodyAcc.std...Y                            |   Hz                                        |
-78  |   fBodyAcc.std...Z                            |   Hz                                        |
-79  |   fBodyAccJerk.std...X                        |   Hz                                        |
-80  |   fBodyAccJerk.std...Y                        |   Hz                                        |
-81  |   fBodyAccJerk.std...Z                        |   Hz                                        |
-82  |   fBodyGyro.std...X                           |   Hz                                        |
-83  |   fBodyGyro.std...Y                           |   Hz                                        |
-84  |   fBodyGyro.std...Z                           |   Hz                                        |
-85  |   fBodyAccMag.std..                           |   Hz                                        |
-86  |   fBodyBodyAccJerkMag.std..                   |   Hz                                        |
-87  |   fBodyBodyGyroMag.std..                      |   Hz                                        | 
-88  |   fBodyBodyGyroJerkMag.std..                  |   Hz                                        |
-  
+	colnames (X_train) <- c (features$V2)
+	colnames (X_test) <- c (features$V2)
+
+### Now, let's rename the values of column 1 in the Y_train and Y_test datasets. Match the numbers in the
+###	column with the ID of its corresponding activity. For example, # 1 = Walking. This fulfills
+###	requirement #3 in the assignment, which is to use descriptive activity names to name the activities 
+###	in the data set.
+### For Y_train:
+
+		for (i in 1: nrow (Y_train)) {
+			if (Y_train$V1 [i] == 1) {
+				Y_train$V1 [i] = "Walking"}
+			else if (Y_train$V1 [i] == 2) {
+				Y_train$V1 [i] = "Walking Upstairs"}
+			else if (Y_train$V1 [i] == 3) {
+				Y_train$V1 [i] = "Walking Downstairs"}
+			else if (Y_train$V1 [i] == 4) {
+				Y_train$V1 [i] = "Sitting"}
+			else if (Y_train$V1 [i] == 5) {
+				Y_train$V1 [i] = "Standing"}
+			else {Y_train$V1 [i] = "Laying"}
+		}
+
+### Do the same for Y_test.
+
+		for (i in 1: nrow (Y_test)) {
+			if (Y_test$V1 [i] == 1) {
+				Y_test$V1 [i] = "Walking"}
+			else if (Y_test$V1 [i] == 2) {
+				Y_test$V1 [i] = "Walking Upstairs"}
+			else if (Y_test$V1 [i] == 3) {
+				Y_test$V1 [i] = "Walking Downstairs"}
+			else if (Y_test$V1 [i] == 4) {
+				Y_test$V1 [i] = "Sitting"}
+			else if (Y_test$V1 [i] == 5) {
+				Y_test$V1 [i] = "Standing"}
+			else {Y_test$V1 [i] = "Laying"}
+		}
+
+### Next, let's extract the mean & sd variables from the X_train and X_test datasets. This fulfills requirement 
+###	#2 in the assignment, which is to extract only the measurements on the mean and standard deviation. To do 
+###	this, I included the terms "Mean", "mean", and "std" as part of my argument to "contains". Additionally, 
+###	we also need to coerce the variable names to syntatically valid names before using the 'select' function.
+
+		valid_variable_names <- make.names (names (X_train), unique = T)
+		colnames (X_train) <- valid_variable_names
+		X_train <- select (X_train, contains ("mean"), contains ("Mean"), contains ("std"))
+
+		valid_variable_names <- make.names (names (X_test), unique = T)
+		colnames (X_test) <- valid_variable_names
+		X_test <- select (X_test, contains ("mean"), contains ("Mean"), contains ("std"))
+
+### Now that we have all the variable names aligned, we will now combine the following datasets: train_subject, 
+###	X_train, Y_train. This fulfills requirement #1 of the assignment. I will also create a column called "Trial" 
+###	to denote whether the subject is doing a train or test run. Additionally, some columns will be renamed to make 
+###	them more descriptive. 
+
+		Y_train <- rename (Y_train, Activity = V1)
+		Merged_table_train <- cbind (train_subject, Y_train, X_train)
+		Merged_table_train <- rename (Merged_table_train, Subject = V1)
+		Merged_table_train <- mutate (Merged_table_train, Trial = "train")
+
+### Repeat the commands above for the 'test' datasets.
+
+		Y_test <- rename (Y_test, Activity = V1)
+		Merged_table_test <- cbind (test_subject, Y_test, X_test)
+		Merged_table_test <- rename (Merged_table_test, Subject = V1)
+		Merged_table_test <- mutate (Merged_table_test, Trial = "test")
+
+### Finally, combine Merged_table_train with Merged_table_test. Also arrange the dataset according to Subject ID in
+###	increasing order.
+			
+		Merged_table <- rbind (Merged_table_train, Merged_table_test)
+		Merged_table <- arrange (Merged_table, Subject)
+		head (Merged_table, 5)
+
+### Last but not least, step 5 of the PA requires us to create an independent tidy data set containing the average of each 
+###	variable for each activity and each subject. There are 180 subject-activity pairs in total.
+
+		Merged_table_avg <- group_by (Merged_table, Activity, Subject)
+		Merged_table_avg_final <- summarize_each (Merged_table_avg, funs (mean), - c( Subject, Activity, Trial))
+		write.table (Merged_table_avg_final, file = "Cleaning & Gathering Data PA", row.names = F)
+		
+### To best view the data, load the "data.table" package into R before reading the text file.
+###	library (data.table) -> fread ("Cleaning & Gathering Data PA.txt")
+
+### The resulting, final dataset fulfills the core tidy data rules.
+###	(1) Each variable forms a column.
+###	(2) Each observation forms a row.
+###	(3) Each type of observational unit forms a table.
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
